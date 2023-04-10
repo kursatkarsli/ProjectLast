@@ -19,7 +19,7 @@ then: npm start
 For the test application on jest:
 npm run test or yarn test
 
-#Application Features
+# Application Features
 
 - When start game initially score being 0-0
 - Updating score is randomly adding score to one of team
