@@ -2,8 +2,8 @@
 
 Web app simulating a World Cup Scoreboard that shows matches and scores.
 
-### For the simulating matches and scores uses hard-coded data.
-### Intervals starting matches and updating scores
+For the simulating matches and scores uses hard-coded data.
+Intervals starting matches and updating scores
 
 ### Tech Stacks
 - React,
