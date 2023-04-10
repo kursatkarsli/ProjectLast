@@ -1,5 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
-import App from './App';
+import App from './ScoreBoard';
+import { Grid } from '@mui/material';
 
 describe('App', () => {
   beforeEach(() => {
@@ -22,5 +23,25 @@ describe('App', () => {
     render(<App />);
     act(() => jest.advanceTimersByTime(1000));
     expect(screen.getByText('Current Games')).toBeInTheDocument();
+  });
+  it('displays the correct flag and alt text', () => {
+    const props = {
+      homeCountryCode: 'us',
+      homeName: 'United States',
+    };
+
+    const { getByAltText } = render(
+      <Grid item flex={1}>
+        <img
+          src={`https://flagcdn.com/${props.homeCountryCode}.svg`}
+          width="50"
+          alt={`${props.homeName}`}
+        />
+      </Grid>
+    );
+
+    const flagImage = screen.getByAltText(props.homeName);
+    expect(flagImage).toHaveAttribute('src', `https://flagcdn.com/${props.homeCountryCode}.svg`);
+    expect(flagImage).toHaveAttribute('width', '50');
   });
 });

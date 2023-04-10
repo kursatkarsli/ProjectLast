@@ -1,98 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import "./App.css";
+import "./ScoreBoard.css";
 import { Divider, Grid, Typography } from "@mui/material";
-
-const data =  [
-  {
-    gameId: 0,
-    startedGame: false,
-    homeTeam: {
-      name: "Mexico",
-      countryCode: "mx",
-      score: 0,
-    },
-    awayTeam: {
-      name: "Canada",
-      countryCode: "ca",
-      score: 0,
-    },
-  },
-  {
-    gameId: 1,
-    startedGame: false,
-    homeTeam: {
-      name: "Spain",
-      countryCode: "es",
-      score: 0,
-    },
-    awayTeam: {
-      name: "Brazil",
-      countryCode: "br",
-      score: 0,
-    },
-  },
-  {
-    gameId: 2,
-    startedGame: false,
-    homeTeam: {
-      name: "Germany",
-      countryCode: "de",
-      score: 0,
-    },
-    awayTeam: {
-      name: "France",
-      countryCode: "fr",
-      score: 0,
-    },
-  },
-  {
-    gameId: 3,
-    startedGame: false,
-    homeTeam: {
-      name: "Uruguay",
-      countryCode: "uy",
-      score: 0,
-    },
-    awayTeam: {
-      name: "Italy",
-      countryCode: "it",
-      score: 0,
-    },
-  },
-  {
-    gameId: 4,
-    startedGame: false,
-    homeTeam: {
-      name: "Argentina",
-      countryCode: "ar",
-      score: 0,
-    },
-    awayTeam: {
-      name: "Australia",
-      countryCode: "au",
-      score: 0,
-    },
-  },
-]
-const STARTING_RANGE = 25000;
-const ENDING_RANGE = 10;
-const competitionsDates = [
-  new Date(Date.now() + Math.floor(Math.random() * STARTING_RANGE)),
-  new Date(Date.now() + Math.floor(Math.random() * STARTING_RANGE)),
-  new Date(Date.now() + Math.floor(Math.random() * STARTING_RANGE)),
-  new Date(Date.now() + Math.floor(Math.random() * STARTING_RANGE)),
-  new Date(Date.now() + Math.floor(Math.random() * STARTING_RANGE)),
-];
-
-
-
-function App() {
+import { competitionData } from "./assets/data/competitionData";
+import { competitionsDates } from "./assets/data/competitionDates";
+import { ENDING_RANGE } from "./assets/constants";
+function ScoreBoard() {
   const [competitions, setCompetitions] = useState([]);
   const [winners, setWinners] = useState([]);
   const updateScoreInterval = useRef();
-  const startGameInterval = useRef()
+  const startGameInterval = useRef();
   useEffect(() => {
-    const updatedData = data.map((competition, index) => {
+    const updatedData = competitionData.map((competition, index) => {
       const startDate = competitionsDates[index];
       const endDate = new Date(startDate);
       endDate.setSeconds(endDate.getSeconds() + ENDING_RANGE);
@@ -101,12 +19,11 @@ function App() {
         ...competition,
         startDate,
         endDate,
-        startedGame:true
       };
     });
     setCompetitions(updatedData);
   }, []);
-
+  // Interval for starting game
   useEffect(() => {
     startGameInterval.current = setInterval(() => {
       setCompetitions((prevCompetitions) => {
@@ -114,14 +31,13 @@ function App() {
         return prevCompetitions.filter((comp) => {
           if (now >= comp.endDate) {
             const {
-              awayTeam: { score, name },
-              homeTeam: { score: homeScore, name: homeName },
+              awayTeam: { score },
+              homeTeam: { score: homeScore },
             } = comp;
             if (score > homeScore) {
-
-              setWinners((prev) => [...prev, {...comp, startedGame:false}]);
+              setWinners((prev) => [...prev, { ...comp, startedGame: false }]);
             } else {
-              setWinners((prev) => [...prev, {...comp, startedGame:false}]);
+              setWinners((prev) => [...prev, { ...comp, startedGame: false }]);
             }
 
             return false;
@@ -129,12 +45,15 @@ function App() {
           return true;
         });
       });
-    }, 1000);
+    }, 2500);
 
     return () => clearInterval(startGameInterval.current);
   }, []);
+
+  // Interval for update score
+
   useEffect(() => {
-      updateScoreInterval.current = setInterval(() => {
+    updateScoreInterval.current = setInterval(() => {
       setCompetitions((prevCompetitions) => {
         const updatedCompetitions = [...prevCompetitions];
         updatedCompetitions.forEach((comp) => {
@@ -142,8 +61,26 @@ function App() {
             const randomTeamIndex = Math.floor(Math.random() * 2);
             if (randomTeamIndex === 0) {
               comp.homeTeam.score += 1;
+              comp.startedGame = true;
+
+              if (
+                comp.homeTeam.winningRate < 100 &&
+                comp.awayTeam.winningRate > 0
+              ) {
+                comp.homeTeam.winningRate += 10;
+                comp.awayTeam.winningRate -= 10;
+              }
             } else {
               comp.awayTeam.score += 1;
+              comp.startedGame = true;
+
+              if (
+                comp.awayTeam.winningRate < 100 &&
+                comp.homeTeam.winningRate > 0
+              ) {
+                comp.awayTeam.winningRate += 10;
+                comp.homeTeam.winningRate -= 10;
+              }
             }
           }
         });
@@ -153,12 +90,13 @@ function App() {
 
     return () => clearInterval(updateScoreInterval.current);
   }, []);
+  // clear all intervas when all matches are finished
   if (winners.length === competitions.length) {
     clearInterval(updateScoreInterval.current);
     clearInterval(startGameInterval.current);
   }
   return (
-     <div className="App">
+    <div className="App">
       <Grid container spacing={2} gap={2}>
         <Grid item xs={12}>
           <Grid container>
@@ -190,18 +128,30 @@ function App() {
                   ({
                     gameId,
                     startedGame,
-                    awayTeam: { score, name },
-                    homeTeam: { score: homeScore, name: homeName },
+                    awayTeam: { score, name, countryCode, winningRate },
+                    homeTeam: {
+                      score: homeScore,
+                      name: homeName,
+                      countryCode: homeCountryCode,
+                      winningRate: homewinningRate,
+                    },
                   }) => (
                     <React.Fragment key={gameId}>
                       <Grid container marginY={1} alignItems={"center"}>
                         <Grid item xs={4}>
                           <Grid container>
                             <Grid item flex={1}>
-                              <Typography>{homeName}</Typography>
-                          </Grid>
-                          <Grid item flex={1}>
-                              <Typography>{homeName}</Typography>
+                              <img
+                                src={`https://flagcdn.com/${homeCountryCode}.svg`}
+                                width="50"
+                                alt={`${homeName}`}
+                              />
+                            </Grid>
+                            <Grid item flex={1}>
+                              <Typography>
+                                {homeName}
+                                <br /> {homewinningRate}%
+                              </Typography>
                             </Grid>
                           </Grid>
                         </Grid>
@@ -217,12 +167,25 @@ function App() {
 
                             <Grid item xs={12}>
                               {" "}
-                              {startedGame ? "playing" : ''}
+                              {startedGame ? "playing" : ""}
                             </Grid>
                           </Grid>
                         </Grid>
                         <Grid item xs={4}>
-                          <div>{name}</div>
+                          <Grid container>
+                            <Grid item flex={1}>
+                              <Typography>
+                                {name} <br /> {winningRate}%
+                              </Typography>
+                            </Grid>
+                            <Grid item flex={1}>
+                              <img
+                                src={`https://flagcdn.com/${countryCode}.svg`}
+                                width="50"
+                                alt={`${name}`}
+                              />
+                            </Grid>
+                          </Grid>{" "}
                         </Grid>
                       </Grid>
                       <Divider
@@ -241,8 +204,12 @@ function App() {
                   ({
                     gameId,
                     startedGame,
-                    awayTeam: { score, name },
-                    homeTeam: { score: homeScore, name: homeName },
+                    awayTeam: { score, name, countryCode },
+                    homeTeam: {
+                      score: homeScore,
+                      name: homeName,
+                      countryCode: homeCountryCode,
+                    },
                   }) => (
                     <>
                       <Grid
@@ -252,7 +219,18 @@ function App() {
                         alignItems={"center"}
                       >
                         <Grid item xs={4}>
-                          <Typography>{homeName}</Typography>
+                          <Grid container>
+                            <Grid item flex={1}>
+                              <img
+                                src={`https://flagcdn.com/${homeCountryCode}.svg`}
+                                width="50"
+                                alt={`${homeName}`}
+                              />
+                            </Grid>
+                            <Grid item flex={1}>
+                              <Typography>{homeName}</Typography>
+                            </Grid>
+                          </Grid>
                         </Grid>
                         <Grid item xs={4}>
                           <Grid
@@ -266,12 +244,23 @@ function App() {
 
                             <Grid item xs={12}>
                               {" "}
-                              {startedGame ? "playing" : null}
+                              {!startedGame ? "finished" : null}
                             </Grid>
                           </Grid>
                         </Grid>
                         <Grid item xs={4}>
-                          <div>{name}</div>
+                          <Grid container>
+                            <Grid item flex={1}>
+                              <Typography>{name}</Typography>
+                            </Grid>
+                            <Grid item flex={1}>
+                              <img
+                                src={`https://flagcdn.com/${countryCode}.svg`}
+                                width="50"
+                                alt={`${name}`}
+                              />
+                            </Grid>
+                          </Grid>{" "}
                         </Grid>
                       </Grid>
                       <Divider
@@ -293,4 +282,4 @@ function App() {
   );
 }
 
-export default App;
+export default ScoreBoard;
