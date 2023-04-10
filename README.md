@@ -12,9 +12,9 @@ Jest
 
 <hr/>
 For the start application:
-git clone https://github.com/kursatkarsli/Soccer-Game.git
-then: npm install
-then: npm start
+- git clone https://github.com/kursatkarsli/Soccer-Game.git
+- then: npm install
+- then: npm start
 
 For the test application on jest:
 npm run test or yarn test
