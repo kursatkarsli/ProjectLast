@@ -11,7 +11,7 @@ Mui,
 Jest
 
 <hr/>
-For the start application:
+For the start application
 - git clone https://github.com/kursatkarsli/Soccer-Game.git
 - then: npm install
 - then: npm start
