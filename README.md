@@ -6,12 +6,12 @@ Web app simulating a World Cup Scoreboard that shows matches and scores.
 # Intervals starting matches and updating scores
 
 ### Tech Stacks
-React,
-Mui,
-Jest
+- React,
+- Mui,
+- Jest
 
 <hr/>
-For the start application
+#### For the start application
 - git clone https://github.com/kursatkarsli/Soccer-Game.git
 - then: npm install
 - then: npm start
